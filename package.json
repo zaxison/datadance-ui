@@ -1,0 +1,19 @@
+{
+  "name": "@datadance/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "main": "./src/index.jsx",
+  "module": "./src/index.jsx",
+  "exports": {
+    ".": "./src/index.jsx",
+    "./styles.css": "./src/styles.css"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
+}
