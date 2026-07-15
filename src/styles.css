@@ -20,11 +20,16 @@
   box-sizing: border-box;
 }
 
-.dd-shell button,
-.dd-shell input,
-.dd-shell textarea,
-.dd-shell select {
+:where(.dd-shell button, .dd-shell input, .dd-shell textarea, .dd-shell select) {
+  appearance: none;
+  margin: 0;
+  color: inherit;
   font: inherit;
+  border: 0;
+}
+
+:where(.dd-shell h1, .dd-shell h2, .dd-shell h3, .dd-shell p) {
+  margin: 0;
 }
 
 .dd-shell {
@@ -37,6 +42,26 @@
   color: #1d2129;
   background: var(--dd-sidebar-bg);
   font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.dd-select-trigger {
+  box-shadow: 0 0 0 1px #dde2e9;
+}
+
+.dd-select-trigger:hover,
+.dd-select-trigger:focus {
+  box-shadow: 0 0 0 1px #3370ff;
+}
+
+.dd-select-trigger.dd-select-trigger-open,
+.dd-select-trigger.dd-select-trigger-open:hover,
+.dd-select-trigger.dd-select-trigger-open:focus {
+  box-shadow: 0 0 0 1px #3370ff, 0 0 0 3px rgba(51, 112, 255, 0.12);
+}
+
+.dd-select-trigger:disabled,
+.dd-select-trigger:disabled:hover {
+  box-shadow: 0 0 0 1px #dde2e9;
 }
 
 .dd-shell-main {

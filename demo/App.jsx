@@ -27,6 +27,14 @@ const statuses = [
   { label: '已完成', value: 'done' },
 ];
 
+const cities = [
+  { label: '北京', value: 'beijing' },
+  { label: '上海', value: 'shanghai' },
+  { label: '杭州', value: 'hangzhou' },
+  { label: '深圳', value: 'shenzhen' },
+  { label: '广州', value: 'guangzhou' },
+];
+
 const cascaderOptions = [{
   label: '数据标注',
   value: 'annotation',
@@ -61,6 +69,8 @@ function Specimen({ title, description, wide = false, children }) {
 
 function Gallery() {
   const [status, setStatus] = useState('running');
+  const [city, setCity] = useState('beijing');
+  const [multiCities, setMultiCities] = useState(['beijing', 'shanghai']);
   const [enabled, setEnabled] = useState(true);
   const [cascader, setCascader] = useState(['annotation', 'text', 'ner']);
   const [date, setDate] = useState('2026-07-15');
@@ -109,10 +119,19 @@ function Gallery() {
           </div>
         </Specimen>
 
-        <Specimen title="Select / Switch" description="自绘下拉面板及开关状态">
+        <Specimen title="Select 选择器" description="默认、内置标签、单选和多选状态">
           <div className="gallery-row">
             <DDSelect className="gallery-input" options={statuses} value={status} onChange={setStatus} />
+            <DDSelect className="gallery-input" label="标签文字" options={statuses} value={status} onChange={setStatus} />
+            <DDSelect className="gallery-input" options={cities} value={city} onChange={setCity} />
+            <DDSelect className="gallery-input" multiple options={cities} value={multiCities} onChange={setMultiCities} />
+          </div>
+        </Specimen>
+
+        <Specimen title="Switch 开关" description="开启、关闭和禁用状态">
+          <div className="gallery-row">
             <DDSwitch checked={enabled} onChange={setEnabled} />
+            <DDSwitch checked={false} onChange={() => {}} />
             <DDSwitch checked disabled />
           </div>
         </Specimen>

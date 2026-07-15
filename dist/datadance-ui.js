@@ -170,7 +170,7 @@ var k = {
 	small: "h-[28px]",
 	default: "h-[32px]",
 	large: "h-[36px]"
-}, j = "absolute top-[calc(100%+4px)] z-[200] rounded-[6px] border border-[#ECEEF9] bg-white p-[4px] shadow-[0_8px_24px_rgba(29,33,41,0.12)]", M = {
+}, j = "absolute top-[calc(100%+2px)] z-[200] rounded-[4px] border border-[#E5E6EB] bg-white py-[4px] shadow-[0_8px_20px_rgba(29,33,41,0.12)]", M = {
 	default: {
 		text: "text-[var(--primary-color)]",
 		primary: "bg-[var(--primary-color)] text-white hover:opacity-90 active:opacity-100",
@@ -278,92 +278,112 @@ function I({ className: e, disabled: t, error: n, prefix: r, size: i, suffix: a,
 		]
 	});
 }
-function L({ className: e, disabled: n = !1, label: a, onChange: o, optionLabel: s = (e) => e.label ?? e, optionValue: l = (e) => e.value ?? e, options: u = [], placeholder: d = "请选择", size: f = "default", value: p }) {
-	let [m, _] = i(!1), v = Math.max(0, u.findIndex((e) => l(e) === p)), [y, b] = i(v), x = r(null), S = r(null), C = u.find((e) => l(e) === p), w = C ? s(C) : "";
+function L({ className: e, disabled: n = !1, label: a, multiple: o = !1, onChange: l, optionLabel: u = (e) => e.label ?? e, optionValue: d = (e) => e.value ?? e, options: f = [], placeholder: m = "请选择", size: _ = "default", value: v }) {
+	let [y, b] = i(!1), x = o && Array.isArray(v) ? v : [], S = Math.max(0, f.findIndex((e) => o ? x.includes(d(e)) : d(e) === v)), [C, w] = i(S), T = r(null), E = r(null), D = f.find((e) => d(e) === v), k = o ? f.filter((e) => x.includes(d(e))) : [], M = D ? u(D) : "";
 	t(() => {
-		b(v);
-	}, [v]), t(() => {
-		if (!m) return;
+		w(S);
+	}, [S]), t(() => {
+		if (!y) return;
 		let e = (e) => {
-			x.current?.contains(e.target) || _(!1);
+			T.current?.contains(e.target) || b(!1);
 		};
 		return document.addEventListener("pointerdown", e), () => document.removeEventListener("pointerdown", e);
-	}, [m]), t(() => {
-		m && (S.current?.querySelector(`[data-dd-option-index="${y}"]`))?.scrollIntoView({ block: "nearest" });
-	}, [y, m]);
-	let T = (e) => {
-		n || (o?.(l(e), e), _(!1));
+	}, [y]), t(() => {
+		y && (E.current?.querySelector(`[data-dd-option-index="${C}"]`))?.scrollIntoView({ block: "nearest" });
+	}, [C, y]);
+	let N = (e) => {
+		if (n) return;
+		let t = d(e);
+		if (o) {
+			let n = x.includes(t) ? x.filter((e) => e !== t) : [...x, t];
+			l?.(n, e);
+			return;
+		}
+		l?.(t, e), b(!1);
+	}, P = (e, t) => {
+		if (e.preventDefault(), e.stopPropagation(), n) return;
+		let r = d(t);
+		l?.(x.filter((e) => e !== r), t);
 	};
 	return /* @__PURE__ */ g("div", {
-		ref: x,
-		className: O("relative flex min-w-0 items-stretch rounded-[6px]", A[f], e),
+		ref: T,
+		className: O("relative flex min-w-0 items-stretch rounded-[4px]", A[_], e),
 		children: [a && /* @__PURE__ */ h("span", {
-			className: "flex h-full shrink-0 items-center rounded-l-[6px] bg-white px-[12px] text-[13px] leading-[22px] tracking-[0.039px] text-[#3F3F51] shadow-[0_0_0_1px_#E2E5F1]",
+			className: "flex h-full shrink-0 items-center rounded-l-[4px] bg-white px-[12px] text-[13px] leading-[22px] tracking-[0.039px] text-[#3F3F51] shadow-[0_0_0_1px_#DDE2E9]",
 			children: a
 		}), /* @__PURE__ */ g("span", {
 			className: "relative min-w-0 flex-1",
 			children: [/* @__PURE__ */ g("button", {
 				type: "button",
 				"aria-disabled": n,
-				"aria-expanded": m,
+				"aria-expanded": y,
 				"aria-haspopup": "listbox",
-				className: O("flex h-full w-full items-center bg-white px-[12px] py-[5px] pr-[32px] text-left text-[13px] leading-[22px] tracking-[0.039px] text-[#0B0B0F] shadow-[0_0_0_1px_#E2E5F1] outline-none transition-all focus:relative focus:z-[1] focus:shadow-[0_0_0_1px_var(--primary-color)]", n && "cursor-not-allowed bg-[#F6F8FA] text-[#C3C3DA]", m && "relative z-[2] shadow-[0_0_0_1px_var(--primary-color)]", a ? "rounded-r-[6px]" : "rounded-[6px]"),
+				"aria-label": a || m,
+				className: O("dd-select-trigger flex h-full w-full items-center overflow-hidden bg-white px-[12px] py-[5px] pr-[32px] text-left text-[13px] leading-[22px] tracking-[0.039px] text-[#1D2129] outline-none transition-shadow hover:relative hover:z-[1] focus:relative focus:z-[1]", n && "cursor-not-allowed bg-[#F6F8FA] text-[#C9CDD4] hover:shadow-[0_0_0_1px_#DDE2E9]", y && "dd-select-trigger-open relative z-[2]", a ? "rounded-r-[4px]" : "rounded-[4px]"),
 				disabled: n,
-				onClick: () => !n && _((e) => !e),
+				onClick: () => !n && b((e) => !e),
 				onKeyDown: (e) => {
 					if (!n) {
 						if (e.key === "Escape") {
-							_(!1);
+							b(!1);
 							return;
 						}
 						if (e.key === "ArrowDown") {
-							if (e.preventDefault(), !m) {
-								_(!0);
-								return;
-							}
-							b((e) => Math.min(u.length - 1, e + 1));
+							e.preventDefault(), y ? w((e) => Math.min(f.length - 1, e + 1)) : b(!0);
 							return;
 						}
 						if (e.key === "ArrowUp") {
-							if (e.preventDefault(), !m) {
-								_(!0);
-								return;
-							}
-							b((e) => Math.max(0, e - 1));
+							e.preventDefault(), y ? w((e) => Math.max(0, e - 1)) : b(!0);
 							return;
 						}
-						if (e.key === "Enter" || e.key === " ") {
-							if (e.preventDefault(), !m) {
-								_(!0);
-								return;
-							}
-							let t = u[y];
-							t && T(t);
-						}
+						(e.key === "Enter" || e.key === " ") && (e.preventDefault(), y ? f[C] && N(f[C]) : b(!0));
 					}
 				},
-				children: [/* @__PURE__ */ h("span", {
-					className: O("min-w-0 flex-1 truncate", !w && "text-[#737A87]"),
-					children: w || d
-				}), /* @__PURE__ */ h(c, { className: O("pointer-events-none absolute right-[10px] top-1/2 h-[12px] w-[12px] -translate-y-1/2 text-[#3F3F51] transition-transform", m && "rotate-180") })]
-			}), m && /* @__PURE__ */ h("div", {
-				ref: S,
+				children: [o ? /* @__PURE__ */ h("span", {
+					className: "flex min-w-0 flex-1 items-center gap-[4px] overflow-hidden",
+					children: k.length > 0 ? k.map((e) => /* @__PURE__ */ g("span", {
+						className: "inline-flex h-[20px] max-w-[92px] shrink-0 items-center gap-[3px] rounded-[3px] bg-[#F2F3F5] px-[6px] text-[12px] leading-[20px] text-[#4E5969]",
+						children: [/* @__PURE__ */ h("span", {
+							className: "truncate",
+							children: u(e)
+						}), /* @__PURE__ */ h(p, {
+							"aria-label": `移除${u(e)}`,
+							className: "h-[11px] w-[11px] shrink-0 cursor-pointer text-[#86909C] hover:text-[#4E5969]",
+							onClick: (t) => P(t, e)
+						})]
+					}, d(e))) : /* @__PURE__ */ h("span", {
+						className: "truncate text-[#86909C]",
+						children: m
+					})
+				}) : /* @__PURE__ */ h("span", {
+					className: O("min-w-0 flex-1 truncate", !M && "text-[#86909C]"),
+					children: M || m
+				}), /* @__PURE__ */ h(c, { className: O("pointer-events-none absolute right-[10px] top-1/2 h-[12px] w-[12px] -translate-y-1/2 text-[#86909C] transition-transform", y && "rotate-180") })]
+			}), y && /* @__PURE__ */ h("div", {
+				ref: E,
 				role: "listbox",
+				"aria-multiselectable": o || void 0,
 				className: O(j, "left-0 right-0 max-h-[260px] overflow-y-auto"),
-				children: u.map((e, t) => {
-					let n = l(e), r = n === p;
-					return /* @__PURE__ */ h("button", {
+				children: f.map((e, t) => {
+					let n = d(e), r = o ? x.includes(n) : n === v;
+					return /* @__PURE__ */ g("button", {
 						type: "button",
 						role: "option",
 						"aria-selected": r,
 						"data-dd-option-index": t,
-						className: O("flex h-[32px] w-full items-center rounded-[4px] px-[12px] text-left text-[13px] leading-[22px] tracking-[0.039px] transition-colors", r ? "bg-[var(--primary-bg-light)] font-medium text-[var(--primary-color)]" : t === y ? "bg-[#F6F8FA] text-[#1D2129]" : "text-[#1D2129] hover:bg-[#F6F8FA]"),
-						onClick: () => T(e),
-						onMouseEnter: () => b(t),
-						children: /* @__PURE__ */ h("span", {
+						className: O("flex h-[34px] w-full items-center gap-[8px] px-[12px] text-left text-[13px] leading-[22px] tracking-[0.039px] transition-colors", r ? "bg-[#F2F5FF] text-[#1D2129]" : t === C ? "bg-[#F6F8FA] text-[#1D2129]" : "text-[#1D2129] hover:bg-[#F6F8FA]"),
+						onClick: () => N(e),
+						onMouseEnter: () => w(t),
+						children: [o && /* @__PURE__ */ h("span", {
+							className: O("flex h-[14px] w-[14px] shrink-0 items-center justify-center rounded-[2px] shadow-[inset_0_0_0_1px_#DDE2E9]", r && "bg-[#3370FF] text-white shadow-none"),
+							children: r && /* @__PURE__ */ h(s, {
+								size: 10,
+								strokeWidth: 2.5
+							})
+						}), /* @__PURE__ */ h("span", {
 							className: "min-w-0 flex-1 truncate",
-							children: s(e)
-						})
+							children: u(e)
+						})]
 					}, n);
 				})
 			})]

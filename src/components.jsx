@@ -19,7 +19,7 @@ const controlSizeClasses = {
   large: 'h-[36px]',
 };
 
-const dropdownSurfaceClass = 'absolute top-[calc(100%+4px)] z-[200] rounded-[6px] border border-[#ECEEF9] bg-white p-[4px] shadow-[0_8px_24px_rgba(29,33,41,0.12)]';
+const dropdownSurfaceClass = 'absolute top-[calc(100%+2px)] z-[200] rounded-[4px] border border-[#E5E6EB] bg-white py-[4px] shadow-[0_8px_20px_rgba(29,33,41,0.12)]';
 
 const semantic = {
   default: {
@@ -159,6 +159,7 @@ export function DDSelect({
   className,
   disabled = false,
   label,
+  multiple = false,
   onChange,
   optionLabel = (option) => option.label ?? option,
   optionValue = (option) => option.value ?? option,
@@ -168,11 +169,17 @@ export function DDSelect({
   value,
 }) {
   const [open, setOpen] = useState(false);
-  const selectedIndex = Math.max(0, options.findIndex((option) => optionValue(option) === value));
+  const selectedValues = multiple ? (Array.isArray(value) ? value : []) : [];
+  const selectedIndex = Math.max(0, options.findIndex((option) => (
+    multiple ? selectedValues.includes(optionValue(option)) : optionValue(option) === value
+  )));
   const [activeIndex, setActiveIndex] = useState(selectedIndex);
   const rootRef = useRef(null);
   const listRef = useRef(null);
   const selectedOption = options.find((option) => optionValue(option) === value);
+  const selectedOptions = multiple
+    ? options.filter((option) => selectedValues.includes(optionValue(option)))
+    : [];
   const displayValue = selectedOption ? optionLabel(selectedOption) : '';
 
   useEffect(() => {
@@ -181,11 +188,9 @@ export function DDSelect({
 
   useEffect(() => {
     if (!open) return;
-
     const handlePointerDown = (event) => {
       if (!rootRef.current?.contains(event.target)) setOpen(false);
     };
-
     document.addEventListener('pointerdown', handlePointerDown);
     return () => document.removeEventListener('pointerdown', handlePointerDown);
   }, [open]);
@@ -198,53 +203,55 @@ export function DDSelect({
 
   const chooseOption = (option) => {
     if (disabled) return;
-    onChange?.(optionValue(option), option);
+    const nextValue = optionValue(option);
+    if (multiple) {
+      const nextValues = selectedValues.includes(nextValue)
+        ? selectedValues.filter((item) => item !== nextValue)
+        : [...selectedValues, nextValue];
+      onChange?.(nextValues, option);
+      return;
+    }
+    onChange?.(nextValue, option);
     setOpen(false);
+  };
+
+  const removeOption = (event, option) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (disabled) return;
+    const removedValue = optionValue(option);
+    onChange?.(selectedValues.filter((item) => item !== removedValue), option);
   };
 
   const handleKeyDown = (event) => {
     if (disabled) return;
-
     if (event.key === 'Escape') {
       setOpen(false);
       return;
     }
-
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        return;
-      }
-      setActiveIndex((current) => Math.min(options.length - 1, current + 1));
+      if (!open) setOpen(true);
+      else setActiveIndex((current) => Math.min(options.length - 1, current + 1));
       return;
     }
-
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        return;
-      }
-      setActiveIndex((current) => Math.max(0, current - 1));
+      if (!open) setOpen(true);
+      else setActiveIndex((current) => Math.max(0, current - 1));
       return;
     }
-
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        return;
-      }
-      const option = options[activeIndex];
-      if (option) chooseOption(option);
+      if (!open) setOpen(true);
+      else if (options[activeIndex]) chooseOption(options[activeIndex]);
     }
   };
 
   return (
-    <div ref={rootRef} className={cn('relative flex min-w-0 items-stretch rounded-[6px]', controlSizeClasses[size], className)}>
+    <div ref={rootRef} className={cn('relative flex min-w-0 items-stretch rounded-[4px]', controlSizeClasses[size], className)}>
       {label && (
-        <span className="flex h-full shrink-0 items-center rounded-l-[6px] bg-white px-[12px] text-[13px] leading-[22px] tracking-[0.039px] text-[#3F3F51] shadow-[0_0_0_1px_#E2E5F1]">
+        <span className="flex h-full shrink-0 items-center rounded-l-[4px] bg-white px-[12px] text-[13px] leading-[22px] tracking-[0.039px] text-[#3F3F51] shadow-[0_0_0_1px_#DDE2E9]">
           {label}
         </span>
       )}
@@ -254,31 +261,48 @@ export function DDSelect({
           aria-disabled={disabled}
           aria-expanded={open}
           aria-haspopup="listbox"
+          aria-label={label || placeholder}
           className={cn(
-            'flex h-full w-full items-center bg-white px-[12px] py-[5px] pr-[32px] text-left text-[13px] leading-[22px] tracking-[0.039px] text-[#0B0B0F] shadow-[0_0_0_1px_#E2E5F1] outline-none transition-all focus:relative focus:z-[1] focus:shadow-[0_0_0_1px_var(--primary-color)]',
-            disabled && 'cursor-not-allowed bg-[#F6F8FA] text-[#C3C3DA]',
-            open && 'relative z-[2] shadow-[0_0_0_1px_var(--primary-color)]',
-            label ? 'rounded-r-[6px]' : 'rounded-[6px]',
+            'dd-select-trigger flex h-full w-full items-center overflow-hidden bg-white px-[12px] py-[5px] pr-[32px] text-left text-[13px] leading-[22px] tracking-[0.039px] text-[#1D2129] outline-none transition-shadow hover:relative hover:z-[1] focus:relative focus:z-[1]',
+            disabled && 'cursor-not-allowed bg-[#F6F8FA] text-[#C9CDD4] hover:shadow-[0_0_0_1px_#DDE2E9]',
+            open && 'dd-select-trigger-open relative z-[2]',
+            label ? 'rounded-r-[4px]' : 'rounded-[4px]',
           )}
           disabled={disabled}
           onClick={() => !disabled && setOpen((current) => !current)}
           onKeyDown={handleKeyDown}
         >
-          <span className={cn('min-w-0 flex-1 truncate', !displayValue && 'text-[#737A87]')}>
-            {displayValue || placeholder}
-          </span>
-          <ChevronDown className={cn('pointer-events-none absolute right-[10px] top-1/2 h-[12px] w-[12px] -translate-y-1/2 text-[#3F3F51] transition-transform', open && 'rotate-180')} />
+          {multiple ? (
+            <span className="flex min-w-0 flex-1 items-center gap-[4px] overflow-hidden">
+              {selectedOptions.length > 0 ? selectedOptions.map((option) => (
+                <span key={optionValue(option)} className="inline-flex h-[20px] max-w-[92px] shrink-0 items-center gap-[3px] rounded-[3px] bg-[#F2F3F5] px-[6px] text-[12px] leading-[20px] text-[#4E5969]">
+                  <span className="truncate">{optionLabel(option)}</span>
+                  <X
+                    aria-label={`移除${optionLabel(option)}`}
+                    className="h-[11px] w-[11px] shrink-0 cursor-pointer text-[#86909C] hover:text-[#4E5969]"
+                    onClick={(event) => removeOption(event, option)}
+                  />
+                </span>
+              )) : <span className="truncate text-[#86909C]">{placeholder}</span>}
+            </span>
+          ) : (
+            <span className={cn('min-w-0 flex-1 truncate', !displayValue && 'text-[#86909C]')}>
+              {displayValue || placeholder}
+            </span>
+          )}
+          <ChevronDown className={cn('pointer-events-none absolute right-[10px] top-1/2 h-[12px] w-[12px] -translate-y-1/2 text-[#86909C] transition-transform', open && 'rotate-180')} />
         </button>
 
         {open && (
           <div
             ref={listRef}
             role="listbox"
+            aria-multiselectable={multiple || undefined}
             className={cn(dropdownSurfaceClass, 'left-0 right-0 max-h-[260px] overflow-y-auto')}
           >
             {options.map((option, index) => {
               const currentValue = optionValue(option);
-              const selected = currentValue === value;
+              const selected = multiple ? selectedValues.includes(currentValue) : currentValue === value;
               const active = index === activeIndex;
               return (
                 <button
@@ -288,9 +312,9 @@ export function DDSelect({
                   aria-selected={selected}
                   data-dd-option-index={index}
                   className={cn(
-                    'flex h-[32px] w-full items-center rounded-[4px] px-[12px] text-left text-[13px] leading-[22px] tracking-[0.039px] transition-colors',
+                    'flex h-[34px] w-full items-center gap-[8px] px-[12px] text-left text-[13px] leading-[22px] tracking-[0.039px] transition-colors',
                     selected
-                      ? 'bg-[var(--primary-bg-light)] font-medium text-[var(--primary-color)]'
+                      ? 'bg-[#F2F5FF] text-[#1D2129]'
                       : active
                         ? 'bg-[#F6F8FA] text-[#1D2129]'
                         : 'text-[#1D2129] hover:bg-[#F6F8FA]'
@@ -298,6 +322,14 @@ export function DDSelect({
                   onClick={() => chooseOption(option)}
                   onMouseEnter={() => setActiveIndex(index)}
                 >
+                  {multiple && (
+                    <span className={cn(
+                      'flex h-[14px] w-[14px] shrink-0 items-center justify-center rounded-[2px] shadow-[inset_0_0_0_1px_#DDE2E9]',
+                      selected && 'bg-[#3370FF] text-white shadow-none'
+                    )}>
+                      {selected && <Check size={10} strokeWidth={2.5} />}
+                    </span>
+                  )}
                   <span className="min-w-0 flex-1 truncate">{optionLabel(option)}</span>
                 </button>
               );
