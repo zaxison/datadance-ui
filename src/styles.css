@@ -1,3 +1,7 @@
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+@source "./components.jsx";
+
 :root {
   --dd-primary-color: var(--primary-color, #5372ff);
   --dd-primary-bg-hover: var(--primary-bg-hover, #e6e9fa);
@@ -9,7 +13,23 @@
   --dd-border: #e2e5f1;
 }
 
+.dd-shell,
+.dd-shell *,
+.dd-shell *::before,
+.dd-shell *::after {
+  box-sizing: border-box;
+}
+
+.dd-shell button,
+.dd-shell input,
+.dd-shell textarea,
+.dd-shell select {
+  font: inherit;
+}
+
 .dd-shell {
+  position: fixed;
+  inset: 0;
   display: flex;
   width: 100vw;
   height: 100vh;

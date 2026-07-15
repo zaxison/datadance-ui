@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { PanelLeftClose } from 'lucide-react';
 import './styles.css';
 import { defaultMenuConfig, getActiveMenu } from './menuConfig.js';
 import logoPng from './assets/logo.png';
@@ -16,6 +17,7 @@ import userClearCache from './assets/user-setting-clear-cache.svg';
 import userLogout from './assets/user-setting-logout.svg';
 
 export { defaultMenuConfig } from './menuConfig.js';
+export * from './components.jsx';
 
 const userMenuGroups = [
   [
@@ -94,12 +96,25 @@ export function DataDanceSidebar({
   const active = useMemo(() => getActiveMenu(menuConfig, activePath), [activePath, menuConfig]);
   const [expandedMenus, setExpandedMenus] = useState(() => active.parent ? [active.parent.id] : ['data-production']);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userCloseTimerRef = useRef(null);
+
+  const openUserMenu = () => {
+    window.clearTimeout(userCloseTimerRef.current);
+    setUserMenuOpen(true);
+  };
+
+  const closeUserMenuSoon = () => {
+    window.clearTimeout(userCloseTimerRef.current);
+    userCloseTimerRef.current = window.setTimeout(() => setUserMenuOpen(false), 150);
+  };
 
   useEffect(() => {
     if (active.parent) {
       setExpandedMenus((current) => current.includes(active.parent.id) ? current : [active.parent.id]);
     }
   }, [active.parent]);
+
+  useEffect(() => () => window.clearTimeout(userCloseTimerRef.current), []);
 
   const navigate = (item) => {
     if (!item.path) return;
@@ -178,8 +193,8 @@ export function DataDanceSidebar({
       <div className="dd-profile-wrap">
         <div
           className="dd-profile"
-          onMouseEnter={() => setUserMenuOpen(true)}
-          onMouseLeave={() => window.setTimeout(() => setUserMenuOpen(false), 150)}
+          onMouseEnter={openUserMenu}
+          onMouseLeave={closeUserMenuSoon}
         >
           <img className="dd-profile-avatar" src={avatar} alt="" />
           <div className="dd-profile-meta">
@@ -189,8 +204,8 @@ export function DataDanceSidebar({
           {userMenuOpen && (
             <UserMenu
               isExpanded={isExpanded}
-              onMouseEnter={() => setUserMenuOpen(true)}
-              onMouseLeave={() => setUserMenuOpen(false)}
+              onMouseEnter={openUserMenu}
+              onMouseLeave={closeUserMenuSoon}
             />
           )}
         </div>
@@ -203,15 +218,24 @@ function MenuItem({ active, activePath, hasArrow, icon, isExpanded, isOpen, labe
   const [hovered, setHovered] = useState(false);
   const itemRef = React.useRef(null);
   const [popupTop, setPopupTop] = useState(0);
+  const closeTimerRef = useRef(null);
 
   const showPopup = () => {
+    window.clearTimeout(closeTimerRef.current);
     const rect = itemRef.current?.getBoundingClientRect();
     setPopupTop(rect ? rect.top + rect.height / 2 : 0);
     setHovered(true);
   };
 
+  const hidePopupSoon = () => {
+    window.clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = window.setTimeout(() => setHovered(false), 120);
+  };
+
+  useEffect(() => () => window.clearTimeout(closeTimerRef.current), []);
+
   return (
-    <div ref={itemRef} className="dd-menu-item-wrap" onMouseEnter={showPopup} onMouseLeave={() => setHovered(false)}>
+    <div ref={itemRef} className="dd-menu-item-wrap" onMouseEnter={showPopup} onMouseLeave={hidePopupSoon}>
       <button className={active ? 'dd-menu-item dd-menu-item-active' : 'dd-menu-item'} onClick={onClick} type="button">
         <img className="dd-menu-icon" src={icon} alt="" aria-hidden="true" />
         {isExpanded && <span className="dd-menu-label">{label}</span>}
@@ -221,7 +245,7 @@ function MenuItem({ active, activePath, hasArrow, icon, isExpanded, isOpen, labe
       </button>
       {!isExpanded && hovered && (
         submenus?.length ? (
-          <div className="dd-collapsed-submenu" style={{ top: popupTop }}>
+          <div className="dd-collapsed-submenu" onMouseEnter={showPopup} onMouseLeave={hidePopupSoon} style={{ top: popupTop }}>
             {submenus.map((sub) => (
               <button
                 className={sub.path === activePath ? 'dd-collapsed-submenu-item dd-collapsed-submenu-item-active' : 'dd-collapsed-submenu-item'}
@@ -281,11 +305,5 @@ function Tooltip({ fixed = false, label, left, top }) {
 }
 
 function CollapseIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect width="18" height="18" x="3" y="3" rx="2" />
-      <path d="M9 3v18" />
-      <path d="m16 15-3-3 3-3" />
-    </svg>
-  );
+  return <PanelLeftClose aria-hidden="true" size={18} strokeWidth={2} />;
 }
