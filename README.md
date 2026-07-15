@@ -40,6 +40,14 @@ compiled CSS is self-contained and does not require Tailwind in the host app.
 npm install
 ```
 
+Run the component gallery to inspect every currently supported component and its interactive states inside the canonical DataDance shell:
+
+```bash
+npm run dev
+```
+
+The gallery is a maintenance surface only. It does not add a route to the fixed product menu and is not included in the published package files.
+
 ## Exports
 
 - `DataDanceShell`
